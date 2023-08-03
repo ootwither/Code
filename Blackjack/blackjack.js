@@ -111,10 +111,13 @@ $('#textInput').on('submit', function (event) { //huge text input and logic syst
         dealerCounter++;
         };
         if (addScore(playerArray) > addScore(dealerArray)) {
-            addStoryLine("you win! Type <em>x</em> to restart", dealerCounter*1000);
+            addStoryLine("You win! Type <em>x</em> to restart", dealerCounter*1000);
             lost = true;
         } else if (addScore(playerArray) < addScore(dealerArray)) {
             addStoryLine("You lose - better luck next time. Type <em>x</em> to restart", dealerCounter*1000)
+            lost = true;
+        } else if (addScore(playerArray) == addScore(dealerArray)) {
+            addStoryLine("A draw! Not so bad, not so good. Type <em>x</em> to restart", dealerCounter*1000)
             lost = true;
         }
 
