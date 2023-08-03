@@ -1,6 +1,6 @@
 const deck = [
     {
-        suit : 'clubs',
+        suit : 'clubss',
         face : '2',
         value : 2,
         drawn : false,

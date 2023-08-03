@@ -4,6 +4,8 @@ text-align:center;
 background-color: black;
 font-family: Georgia, Palatino, "Times New Roman", Times, serif;
 font-size:medium;
+width: 50%;
+margin: auto;
 }
 
 #textInput {
@@ -11,20 +13,8 @@ font-size:medium;
     padding-top: 10px;
 }
 
-.blackCard {
-    background-color: white;
-    color: black;
-    display:inline-block
-}
-
-.redCard {
-    background-color: white;
-    color: red;
-    display:inline-block
-}
-
 input {
-    width: 400px;
+    width: auto;
 }
 
 .story {
