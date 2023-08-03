@@ -5,9 +5,9 @@ $(document).ready(function(){ // start script only after page load
 let playerArray = []; //initialize the array we'll hold player cards in
 let dealerArray = []; //same for the dealer's array
 let dealerCounter = 1; //variable we use to animate the dealer's turn when standing
-wallet = 610; //starting cash
+// wallet = 610; // betting coming in the next expansion pack
 let cardStyle = '<span style=background-color:white;color:black>' // there MUST be a better way to do this
-
+let lost = false; // use this to stop extra hits / stands after a loss
 const blackjackTable = 
     {
         story: 'you are at the blackjack table',
@@ -17,27 +17,46 @@ const blackjackTable =
         hit: 'YOU HAT',
     };
 
+const intros = ["The bright noises of a thousand slot machines assail your ears. You struggle to focus on the table as it all comes down to this: win this last hand and you'll have enough money to save the orphanage.",
+ "You grin at the dealer as you saunter up to the table. 'Deal me in!' you bark, as you flick her a thousand dollar token for luck.",
+  "The pair of you, alone on a dismasted yacht, thousands of miles from anywhere. Nothing to do but play card games and wait for rescue.",
+  "You moved to LA nearly a year ago and this is the biggest break you've had so far: a background extra in a casino scene in the new Wes Anderson film. Time for the best performance of your life.",
+  "You take another gulp of whiskey and signal to the dealer to carry on, as the bar fight rages around you.",
+  "This is it, the final game of BlackJack MegaStars 2025, sponsored by Lockheed Martin. A million dollars in the prize pot. You adjust your Raybans and motion to the dealer to begin."    
+]
+
 var room = blackjackTable;
 initialize();
 
 function initialize (){ // set the stage
     $('.story').remove();
     deckInitialize();
+    lost = false;
     playerArray = [];
     dealerArray = [];
     drawCard(dealerArray, 2); // we do track both of the dealer's cards for verisimilitude
     drawCard(playerArray, 2);
     dealerCounter = 1.5;
-    addStoryLine(room.story, 2000);
-    addStoryLine('the dealer draws the ' +cardStyle + dealerArray[0].face + ' of ' + dealerArray[0].suit, 2000);
-    addStoryLine('and places one card face down for herself', 2500);
-    addStoryLine(`she deals you the ` + cardStyle+ playerArray[0].face + ' of ' + playerArray[0].suit + '</span>', 4000);
-    addStoryLine('and the ' + cardStyle + playerArray[1].face + " of " + playerArray[1].suit, 4500);
+    addStoryLine(intros[getRandomInt(intros.length)], 2000);
+    addStoryLine('The dealer draws the ' +cardStyle + dealerArray[0].face + ' of ' + dealerArray[0].suit, 2000);
+    addStoryLine('and places another card face down for herself.', 2500);
+    addStoryLine(`She deals you the ` + cardStyle+ playerArray[0].face + ' of ' + playerArray[0].suit + '</span>', 4000);
+    addStoryLine('and the ' + cardStyle + playerArray[1].face + " of " + playerArray[1].suit+".", 4500);
     reportInitialScore(4000);
 
     if (addScore(playerArray) == 21 && addScore(dealerArray) !=21) { // check for blackjack on draw
-        addStoryLine('HOLY SHIT BLACKJACK WOOOOOO', 5000);
-    } else {
+        addStoryLine("You slam the table and shout for joy. <br>'Blackjack!'", 5000);
+        addStoryLine("Type x to play again, you lucky bastard", 6000);
+        lost = true;
+    } else if (addScore(playerArray) == 21 && addScore(dealerArray) ==21){ // check for ultra rare double blackjack
+        addStoryLine('Your grin turns to a scowl as the dealer flips over her second card, the ' +cardStyle+dealerArray[1].face + ' of ' + dealerArray[1].suit + "</span><br> 'A draw I'm afraid!' she chirps at you happily.")
+        lost = true;
+    } else if (addScore(dealerArray) == 21) {
+        addStoryLine('The dealer peeks under her second card and then reveals it: the ' +cardStyle+dealerArray[1].face + ' of ' + dealerArray[1].suit + ".</span><br> 'That's blackjack for me, terribly sorry!' she beams.<br> Type <em>x</em> to restart.", 5000)
+        lost = true;
+    }
+
+    else {
     addStoryLine(room.options, 4500);
     }
  
@@ -50,7 +69,7 @@ $('#textInput').on('submit', function (event) { //huge text input and logic syst
     let input = $input.val();
     input = input.toLowerCase(); // sanitise case
 
-    if(input == 'hit'){ // hit logic
+    if(input == 'hit' && !lost){ // hit logic
         drawCard(playerArray,1);
         $('.story').last().remove();
         $('.story').last().remove();
@@ -59,7 +78,8 @@ $('#textInput').on('submit', function (event) { //huge text input and logic syst
         addStoryLine(room.options, 1500);
         if (addScore(playerArray) > 21) {
             $('.story').last().remove();
-             addStoryLine('you lose, press <em>x</em to restart',1000);
+             addStoryLine("You lose this one I'm afraid: press <em>x</em to restart",1000);
+             lost = true;
          }
 
         /*
@@ -76,7 +96,7 @@ $('#textInput').on('submit', function (event) { //huge text input and logic syst
     } 
 // end of hit logic
 
-    else if(input== 'stand') { // stand logic
+    else if(input== 'stand' && !lost) { // stand logic
 
         $('.story').last().remove();
         addStoryLine('You signal your intention to stand. <br>The dealer turns over her card to reveal the '+cardStyle + dealerArray[1].face + ' of ' + dealerArray[1].suit, dealerCounter*1500);
@@ -90,6 +110,13 @@ $('#textInput').on('submit', function (event) { //huge text input and logic syst
         reportScore(dealerCounter*1500);
         dealerCounter++;
         };
+        if (addScore(playerArray) > addScore(dealerArray)) {
+            addStoryLine("you win! Type <em>x</em> to restart", dealerCounter*1000);
+            lost = true;
+        } else if (addScore(playerArray) < addScore(dealerArray)) {
+            addStoryLine("You lose - better luck next time. Type <em>x</em> to restart", dealerCounter*1000)
+            lost = true;
+        }
 
     } 
 // end of stand logic
@@ -99,6 +126,9 @@ $('#textInput').on('submit', function (event) { //huge text input and logic syst
     //reset and invalid input logic here
     else if(input== 'x'){
         initialize();
+    } else if (lost){
+        $('.story').last().remove();
+        addStoryLine("Nope, the game is over. Type <em>x</em> to restart.")
     } else {
         $('.story').last().remove();
         addStoryLine(room.invalid);
@@ -162,314 +192,266 @@ globalThis.deck = [
         suit : 'clubs',
         face : '2',
         value : 2,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : '3',
         value : 3,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : '4',
         value : 4,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : '5',
         value : 5,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : '6',
         value : 6,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : '7',
         value : 7,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : '8',
         value : 8,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : '9',
         value : 9,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : '10',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : 'jack',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : 'queen',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : 'king',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'clubs',
         face : 'ace',
         value : 11,
-        drawn : false,
+        ace: true,
     },
     {
         suit : 'hearts',
         face : '2',
         value : 2,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : '3',
         value : 3,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : '4',
         value : 4,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : '5',
         value : 5,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : '6',
         value : 6,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : '7',
         value : 7,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : '8',
         value : 8,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : '9',
         value : 9,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : '10',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : 'jack',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : 'queen',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : 'king',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'hearts',
         face : 'ace',
         value : 11,
-        drawn : false,
+        ace: true,
     },
     {
         suit : 'diamonds',
         face : '2',
         value : 2,
-        drawn : false,
     },
 
     {
         suit : 'diamonds',
         face : '3',
         value : 3,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : '4',
         value : 4,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : '5',
         value : 5,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : '6',
         value : 6,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : '7',
         value : 7,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : '8',
         value : 8,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : '9',
         value : 9,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : '10',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : 'jack',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : 'queen',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : 'king',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'diamonds',
         face : 'ace',
         value : 11,
-        drawn : false,
+        ace: true,
     },{
         suit : 'spades',
         face : '2',
         value : 2,
-        drawn : false,
     },
 
     {
         suit : 'spades',
         face : '3',
         value : 3,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : '4',
         value : 4,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : '5',
         value : 5,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : '6',
         value : 6,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : '7',
         value : 7,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : '8',
         value : 8,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : '9',
         value : 9,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : '10',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : 'jack',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : 'queen',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : 'king',
         value : 10,
-        drawn : false,
     },
     {
         suit : 'spades',
         face : 'ace',
         value : 11,
-        drawn : false,
+        ace: true,
     }
 ]
 
