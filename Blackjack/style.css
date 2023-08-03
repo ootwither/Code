@@ -1,6 +1,6 @@
 body {
 color:mintcream;
-text-align: center;
+text-align:center;
 background-color: black;
 font-family: Lucida Console;
 font-size:medium;
@@ -11,8 +11,16 @@ font-size:medium;
     padding-top: 10px;
 }
 
-.card {
+.blackCard {
     background-color: white;
+    color: black;
+    display:inline-block
+}
+
+.redCard {
+    background-color: white;
+    color: red;
+    display:inline-block
 }
 
 input {
