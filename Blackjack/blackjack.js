@@ -8,12 +8,12 @@ let dealerCounter = 1; //variable we use to animate the dealer's turn when STAND
 let cardStyle = '<span style=background-color:white;color:black>' // there MUST be a better way to do this
 let lost = false; // use this to stop extra hits / stands after a loss
 
-const blackjackTable = 
+const blackjackTable = // room structure left over from when I was trying to make a full text adventure
     {
-        story: 'you are at the blackjack table',
-        options: "you can <b>hit</b> or <b>stand</b> or type <b>x</b> to restart",
-        invalid: "I don't know how to do that - please type <b>hit</b> or <b>stand</b> or type <b>x</b> to restart",
-        allowedOptions: ['hit', 'stand'],
+        //story: 'you are at the blackjack table',
+        options: "you can <b>hit</b> or <b>stand</b> or type <b>x</b> to restart.",
+        invalid: "I don't know how to do that - please type <b>hit</b> or <b>stand</b> or type <b>x</b> to restart.",
+        //allowedOptions: ['hit', 'stand'],
     };
 
 const intros = ["The bright noises of a thousand slot machines assail your ears. You struggle to focus on the table as it all comes down to this: win this last hand and you'll have enough money to save the orphanage.",
@@ -182,7 +182,7 @@ function drawCard(array, num) {
 }
 
 
-
+//giant deck of cards object
 function deckInitialize(){
 globalThis.deck = [
     {
